@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:medicuraapp/core/theme/app_theme.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class AiChat extends StatefulWidget {
+  const AiChat({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<AiChat> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<AiChat> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [
-    {'role': 'assistant', 'content': 'Hello Oswa! I am MediCura. How can I help you today?'}
+    {'role': 'assistant', 'content': 'Hello! I am MediCura. How can I help you today?'}
   ];
   bool _isLoading = false;
 

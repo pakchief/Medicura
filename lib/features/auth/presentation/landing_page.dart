@@ -1,109 +1,111 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/primary_button.dart';
+import 'package:flutter/gestures.dart';
 import 'package:go_router/go_router.dart';
 
-class LandingScreen extends StatelessWidget {
-  const LandingScreen({super.key});
+class LandingPage extends StatelessWidget {
+  const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      // The background image fills the entire screen
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            // NOTE: Replace this network image with your actual local asset later
+            image: AssetImage()
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Spacer(flex: 2), // Pushes the logo down
-
-              // The Logo and Text Layout
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Placeholder for your actual Figma SVG logo
-                  const Icon(
-                    Icons.medical_information_outlined,
-                    size: 80,
-                    color: AppTheme.primaryTeal,
-                  ),
-                  const SizedBox(width: 16),
-
-                  // The Stacked Text
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'MEDICURA',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.primaryTeal,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Text(
-                        'HEALTH APP',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.primaryTeal,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const Spacer(flex: 3), // Pushes the button to the bottom
-
-              // The Gradient Button with the Arrow
-              PrimaryButton(
-                text: 'Login',
-                trailingIcon: Icons.arrow_forward,
-                onPressed: () {
-                  context.push('/login');
-                },
-              ),
-
-              const SizedBox(height: 24),
-
-              // The Sign Up Link
-              GestureDetector(
-                onTap: () {
-                  context.push('/signup');
-                },
-                child: const Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Don’t have an account? ',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 16,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'Sign up',
-                        style: TextStyle(
-                          color: AppTheme.gradientEnd, // Using the lighter teal for the text link
-                          fontSize: 16,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+              // Title
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 40.0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'MEDICURA HEALTH APP',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 40), // Bottom padding
+              const SizedBox(height: 180), // Pushes the buttons to the bottom
+
+              // The Gradient Login Button
+              GestureDetector(
+                onTap: () => context.push('/login'), // Navigates to Login
+                child: Container(
+                  width: 298,
+                  height: 47,
+                  decoration: ShapeDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFF2698C2), Color(0xFF57D0EB)],
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // The Sign Up RichText Link
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: 'Don’t have an account?',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' Sign up',
+                      style: const TextStyle(
+                        color: Color(0xFF2698C2),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w700,
+                      ),
+                      // Makes the text clickable
+                      recognizer: TapGestureRecognizer()..onTap = () {
+                        context.push('/signup'); // Navigates to Sign up
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 60), // Bottom padding
             ],
           ),
         ),
