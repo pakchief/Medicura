@@ -19,24 +19,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter email and password")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
+      );
       return;
     }
 
     setState(() => _isLoading = true);
-
     try {
       await Supabase.instance.client.auth.signInWithPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-
       if (mounted) context.go('/home');
-
     } on AuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid login credentials"), backgroundColor: Colors.redAccent));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("An error occurred during login")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid login credentials"), backgroundColor: Colors.redAccent),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -48,29 +47,91 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 60),
-              const Text('MEDICURA', style: AppTheme.titleStyle),
-              const SizedBox(height: 10),
-              const Text('Welcome Back', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 40),
 
-              CustomTextField(hintText: 'Email', suffixIcon: Icons.email, controller: _emailController),
-              CustomTextField(hintText: 'Password', suffixIcon: Icons.lock, isPassword: true, controller: _passwordController),
+              // 1. Branding Image (The "MEDICURA" text image)
+              Image.asset(
+                'assets/images/Medicuratext.png', // Ensure this file exists
+                height: 60,
+                fit: BoxFit.contain,
+              ),
 
-              const SizedBox(height: 30),
-              _isLoading
-                  ? const CircularProgressIndicator(color: AppTheme.primaryTeal)
-                  : PrimaryButton(text: 'Login', onPressed: _handleLogin),
+              const SizedBox(height: 50),
 
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () => context.go('/signup'),
-                child: const Text("Don't have an account? Sign up", style: TextStyle(color: AppTheme.primaryTeal)),
-              )
+              // 2. The Background Box (Login Container)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE6F7FA), // Light blue background box
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: const Color(0xFF7DC6D0).withOpacity(0.25)),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // Username/Email Field
+                    CustomTextField(
+                      hintText: 'Username',
+                      suffixIcon: Icons.person,
+                      controller: _emailController,
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // Password Field
+                    CustomTextField(
+                      hintText: 'Password',
+                      suffixIcon: Icons.lock,
+                      isPassword: true,
+                      controller: _passwordController,
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Gradient Login Button
+                    _isLoading
+                        ? const CircularProgressIndicator(color: AppTheme.primaryTeal)
+                        : PrimaryButton(
+                      text: 'Login',
+                      onPressed: _handleLogin,
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // Sign Up Link
+                    GestureDetector(
+                      onTap: () => context.go('/signup'),
+                      child: const Text.rich(
+                        TextSpan(
+                          text: 'Don’t have an account? ',
+                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          children: [
+                            TextSpan(
+                              text: 'Sign up',
+                              style: TextStyle(
+                                color: Color(0xFF4DD0E1), // Light teal/blue
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

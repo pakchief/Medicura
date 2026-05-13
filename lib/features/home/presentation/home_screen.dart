@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:medicuraapp/core/theme/app_theme.dart';
 
-class AiChat extends StatefulWidget {
-  const AiChat({super.key});
+class AiChatPage extends StatefulWidget {
+  const AiChatPage({super.key});
 
   @override
-  State<AiChat> createState() => _HomeScreenState();
+  State<AiChatPage> createState() => _AiChatPageState();
 }
 
-class _HomeScreenState extends State<AiChat> {
+class _AiChatPageState extends State<AiChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _messages = [
     {'role': 'assistant', 'content': 'Hello! I am MediCura. How can I help you today?'}
   ];
   bool _isLoading = false;
 
-  // --- LLM Logic (Groq + Llama 3) ---
+  // --- LLM Logic (Your Groq + Llama 3 Integration) ---
   Future<void> sendMessageToLlama(String userText) async {
     if (userText.trim().isEmpty) return;
 
@@ -28,7 +28,7 @@ class _HomeScreenState extends State<AiChat> {
 
     try {
       final dio = Dio();
-      // !!! IMPORTANT: Paste your actual key here !!!
+      // Use your actual Groq API Key here
       const String apiKey = "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";
 
       final response = await dio.post(
@@ -39,7 +39,7 @@ class _HomeScreenState extends State<AiChat> {
           "messages": [
             {
               "role": "system",
-              "content": "You are MediCura, an empathetic medical assistant. Be supportive and concise."
+              "content": "You are MediCura, an empathetic medical assistant for a user. Be supportive and concise."
             },
             ..._messages.map((m) => {"role": m['role'], "content": m['content']}),
           ],
@@ -64,97 +64,125 @@ class _HomeScreenState extends State<AiChat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F5), // WhatsApp-style light grey
-      appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
-        title: const Text('MediCura AI', style: TextStyle(color: Colors.white)),
-        elevation: 0,
-      ),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Chat Message List
+          // 1. TOP AVATAR HEADER (From image_1ca6f9.png)
+          Stack(
+            children: [
+              Container(
+                height: MediaQuery.of(context).size.height * 0.65,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/avatarimage.jpg'),
+                    fit: BoxFit.fitWidth,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(icon: const Icon(Icons.menu, color: Color(0xFF4DD0E1)), onPressed: () {}),
+                      Image.asset('assets/images/Medicuratext.png', height: 40),
+                      IconButton(icon: const Icon(Icons.notifications, color: Color(0xFF4DD0E1)), onPressed: () {}),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // 2. CHAT MESSAGES
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               itemCount: _messages.length,
-              itemBuilder: (context, index) => _buildChatBubble(_messages[index]),
+              itemBuilder: (context, index) {
+                final msg = _messages[index];
+                return _buildChatBubble(msg['content']!, msg['role'] == 'user');
+              },
             ),
           ),
 
           // Loading Indicator
           if (_isLoading)
             const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: LinearProgressIndicator(color: AppTheme.primaryTeal, backgroundColor: Colors.transparent),
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: CircularProgressIndicator(color: AppTheme.primaryTeal),
             ),
 
-          // WhatsApp Style Input Field
-          _buildInputArea(),
+          // 3. GRADIENT INPUT AREA
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Container(
+              height: 55,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2E93B9), Color(0xFF4FD1C5)],
+                ),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 15),
+                  const Icon(Icons.add_circle_outline, color: Colors.white70),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Ask Anything',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        border: InputBorder.none,
+                      ),
+                      onSubmitted: sendMessageToLlama,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white),
+                    onPressed: () => sendMessageToLlama(_messageController.text),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildChatBubble(Map<String, String> msg) {
-    bool isUser = msg['role'] == 'user';
+  Widget _buildChatBubble(String text, bool isUser) {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFFDCF8C6) : Colors.white, // WhatsApp bubble colors
+          color: isUser ? const Color(0xFF2E93B9) : const Color(0xFFE6F7FA),
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(15),
-            topRight: const Radius.circular(15),
-            bottomLeft: Radius.circular(isUser ? 15 : 0),
-            bottomRight: Radius.circular(isUser ? 0 : 15),
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
+            bottomLeft: Radius.circular(isUser ? 20 : 0),
+            bottomRight: Radius.circular(isUser ? 0 : 20),
           ),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2, offset: const Offset(0, 1)),
-          ],
         ),
         child: Text(
-          msg['content']!,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          text,
+          style: TextStyle(
+            color: isUser ? Colors.white : Colors.black87,
+            fontSize: 15,
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      color: Colors.white,
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0F2F5),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: TextField(
-                controller: _messageController,
-                decoration: const InputDecoration(
-                  hintText: "Type a message",
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          CircleAvatar(
-            backgroundColor: AppTheme.primaryTeal,
-            radius: 24,
-            child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: () => sendMessageToLlama(_messageController.text),
-            ),
-          ),
-        ],
       ),
     );
   }

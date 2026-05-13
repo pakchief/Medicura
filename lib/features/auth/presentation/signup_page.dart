@@ -15,35 +15,45 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController(); // New Controller
   bool _isLoading = false;
 
   Future<void> _handleSignUp() async {
-    // 1. Basic validation
+    // 1. Validation: Check for empty fields
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please fill in all fields")));
+      _showSnackBar("Please fill in all fields");
+      return;
+    }
+
+    // 2. Validation: Check if passwords match
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _showSnackBar("Passwords do not match");
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      // 2. Create the user in Supabase Auth
+      // 3. Create user in Supabase
       await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // 3. Move to preferences on success
-      if (mounted) context.go('/preference');
-
+      if (mounted) context.go('/preference'); // Move to user preferences
     } on AuthException catch (e) {
-      // Catch specific Supabase errors (like "Password too short")
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message), backgroundColor: Colors.redAccent));
+      _showSnackBar(e.message);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("An unexpected error occurred")));
+      _showSnackBar("An unexpected error occurred");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+    );
   }
 
   @override
@@ -51,30 +61,99 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView( // Added scroll view to prevent keyboard overflow
-          padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 60),
-              const Text('MEDICURA', style: AppTheme.titleStyle),
-              const SizedBox(height: 10),
-              const Text('Create Account', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               const SizedBox(height: 40),
 
-              CustomTextField(hintText: 'Email', suffixIcon: Icons.email, controller: _emailController),
-              CustomTextField(hintText: 'Password', suffixIcon: Icons.lock, isPassword: true, controller: _passwordController),
+              // Branding Image
+              Image.asset(
+                'assets/images/Medicuratext.png',
+                height: 60,
+                fit: BoxFit.contain,
+              ),
 
               const SizedBox(height: 30),
-              _isLoading
-                  ? const CircularProgressIndicator(color: AppTheme.primaryTeal)
-                  : PrimaryButton(text: 'Sign Up', onPressed: _handleSignUp),
 
+              // The Background Box (Sign Up Container)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 35),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE6F7FA), // Light blue box matching image_1d9430.png
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: const Color(0xFFB2EBF2).withOpacity(0.5)),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Create Account',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    CustomTextField(
+                      hintText: 'Email',
+                      suffixIcon: Icons.email,
+                      controller: _emailController,
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    CustomTextField(
+                      hintText: 'Password',
+                      suffixIcon: Icons.lock,
+                      isPassword: true,
+                      controller: _passwordController,
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // NEW: Confirm Password Field
+                    CustomTextField(
+                      hintText: 'Confirm Password',
+                      suffixIcon: Icons.lock_outline,
+                      isPassword: true,
+                      controller: _confirmPasswordController,
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    _isLoading
+                        ? const CircularProgressIndicator(color: AppTheme.primaryTeal)
+                        : PrimaryButton(
+                      text: 'Sign Up',
+                      onPressed: _handleSignUp,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    GestureDetector(
+                      onTap: () => context.go('/login'),
+                      child: const Text.rich(
+                        TextSpan(
+                          text: 'Already have an account? ',
+                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          children: [
+                            TextSpan(
+                              text: 'Login',
+                              style: TextStyle(
+                                color: Color(0xFF4DD0E1),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
-              TextButton(
-                onPressed: () => context.go('/login'),
-                child: const Text("Already have an account? Log in", style: TextStyle(color: AppTheme.primaryTeal)),
-              )
             ],
           ),
         ),

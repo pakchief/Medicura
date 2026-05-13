@@ -20,7 +20,7 @@ class AppRouter {
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/signup', builder: (context, state) => const SignUpScreen()),
       GoRoute(path: '/preference', builder: (context, state) => const PreferenceScreen()),
-      GoRoute(path: '/ai_chat',  builder: (context, state) => const AiChat()),
+      GoRoute(path: '/ai_chat',  builder: (context, state) => const AiChatPage()),
       GoRoute(path: '/home',builder: (context, state) => const MainLayout()),
       GoRoute(path: '/emergency',builder: (context, state) => const EmergencyPage()),
       GoRoute(path: '/insights',builder: (context, state) => const HealthInsightsPage()),
